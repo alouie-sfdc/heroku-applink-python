@@ -230,7 +230,7 @@ class DataAPI:
                 if auth_error is not None:
                     raise auth_error
                 
-            response.raise_for_statusI()
+            response.raise_for_status()
 
             # Using orjson for faster JSON deserialization over the stdlib.
             # This is not implemented using the `loads` argument to `Response.json` since:
