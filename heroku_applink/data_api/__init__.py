@@ -22,7 +22,7 @@ from ._requests import (
     RestApiRequest,
     UpdateRecordRestApiRequest,
 )
-from .exceptions import ClientError, UnexpectedRestApiResponsePayload
+from .exceptions import AuthorizationError, ClientError, UnexpectedRestApiResponsePayload
 from .record import Record, RecordQueryResult
 from .reference_id import ReferenceId
 from .unit_of_work import UnitOfWork
@@ -221,7 +221,16 @@ class DataAPI:
                 headers=self._default_headers(),
                 data=None if body is None else _json_serialize(body),
                 timeout=timeout,
+                raise_for_status=False,
             )
+
+            if response.status == 401:
+                # See if we can extract enough detail to return an AuthorizationError
+                auth_error = await self._maybe_parse_auth_error(response)
+                if auth_error is not None:
+                    raise auth_error
+                
+            response.raise_for_statusI()
 
             # Using orjson for faster JSON deserialization over the stdlib.
             # This is not implemented using the `loads` argument to `Response.json` since:
@@ -242,6 +251,25 @@ class DataAPI:
             ) from e
 
         return await rest_api_request.process_response(response.status, json_body)
+
+    async def _maybe_parse_auth_error(self, response: aiohttp.ClientResponse) -> AuthorizationError | None:
+        """
+        Return an AuthorizationError if the response has sufficient information.
+        Assumes that the status code of the response is 401.
+        """
+        try:
+            response_body = await response.read()
+            json_body = orjson.loads(response_body) if response_body else None
+        except aiohttp.ClientResponseError | orjson.JSONDecodeError:
+            return
+
+        try:
+            err = AuthorizationError(message=json_body["message"], error_code=json_body["errorCode"])
+        except KeyError:
+            return
+        
+        return err
+
 
     async def _download_file(self, url: str) -> bytes:
         response = await self._connection.request(
