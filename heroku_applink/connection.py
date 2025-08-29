@@ -56,12 +56,15 @@ class Connection:
         params=None,
         headers=None,
         data=None,
-        timeout: float|None=None
+        timeout: float|None=None,
+        raise_for_status=None,
     ) -> aiohttp.ClientResponse:
         """
         Make an HTTP request to the given URL.
 
         If a timeout is provided, it will be used to set the timeout for the request.
+
+        If raise_for_status is provided, it will override the value set in the client session.
         """
 
         if timeout is not None:
@@ -91,7 +94,8 @@ class Connection:
             params=params,
             headers=headers,
             data=data,
-            timeout=timeout
+            timeout=timeout,
+            raise_for_status=raise_for_status,
         )
 
         return response
