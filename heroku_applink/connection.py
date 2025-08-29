@@ -56,15 +56,12 @@ class Connection:
         params=None,
         headers=None,
         data=None,
-        timeout: float|None=None,
-        raise_for_status=None,
+        timeout: float|None=None
     ) -> aiohttp.ClientResponse:
         """
         Make an HTTP request to the given URL.
 
         If a timeout is provided, it will be used to set the timeout for the request.
-
-        If raise_for_status is provided, it will override the value set in the client session.
         """
 
         if timeout is not None:
@@ -94,8 +91,7 @@ class Connection:
             params=params,
             headers=headers,
             data=data,
-            timeout=timeout,
-            raise_for_status=raise_for_status,
+            timeout=timeout
         )
 
         return response
@@ -128,7 +124,6 @@ class Connection:
                 # Disable cookie storage using `DummyCookieJar`, given that we
                 # don't need cookie support.
                 cookie_jar=aiohttp.DummyCookieJar(),
-                raise_for_status=True,
                 timeout=aiohttp.ClientTimeout(
                     total=self._config.request_timeout,
                     connect=self._config.connect_timeout,

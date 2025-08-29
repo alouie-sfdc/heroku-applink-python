@@ -7,14 +7,13 @@ For full license text, see the LICENSE file in the repo root or https://opensour
 
 from dataclasses import dataclass
 
-# The order in `__all__` is the order in which pdoc3 will display the classes in the docs.
+# The order in `__all__` is the in which pdoc3 will display the classes in the docs.
 __all__ = [
     "DataApiError",
     "SalesforceRestApiError",
     "InnerSalesforceRestApiError",
     "MissingFieldError",
     "ClientError",
-    "AuthorizationError",
     "UnexpectedRestApiResponsePayload",
 ]
 
@@ -64,19 +63,6 @@ class MissingFieldError(DataApiError):
 
 class ClientError(DataApiError):
     """Raised when the API request failed due to a connection error, timeout, or malformed HTTP response."""
-
-
-@dataclass(frozen=True, kw_only=True, slots=True)
-class AuthorizationError(DataApiError):
-    """Raised when the API request failed due to an authorization error."""
-
-    message: str
-    """The description of this error."""
-    error_code: str
-    """The error code for this error."""
-
-    def __str__(self) -> str:
-        return f"{self.error_code} error:\n{self.message}"
 
 
 class UnexpectedRestApiResponsePayload(DataApiError):
