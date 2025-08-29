@@ -264,8 +264,8 @@ class DataAPI:
             return
 
         try:
-            err = AuthorizationError(message=json_body["message"], error_code=json_body["errorCode"])
-        except KeyError:
+            err = AuthorizationError(message=json_body[0]["message"], error_code=json_body[0]["errorCode"])
+        except:
             return
         
         return err
